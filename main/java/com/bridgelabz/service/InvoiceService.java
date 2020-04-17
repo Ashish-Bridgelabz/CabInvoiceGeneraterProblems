@@ -1,35 +1,36 @@
 package com.bridgelabz.service;
 
-public class InvoiceGenerator {
+import java.util.ArrayList;
+
+public class InvoiceService {
     private static final int COST_PER_TIME = 1;
     private static final double MINIMUM_COST_PER_KILOMETER = 10;
     private static final double MINIMUM_FARE = 5;
-
+    RideRepository rideRepository = new RideRepository();
+    ArrayList<Ride> listOfRides = new ArrayList<Ride>();
     public double calculatefare(double distance, int time) {
         double totalFare = distance * MINIMUM_COST_PER_KILOMETER + time * COST_PER_TIME;
         return Math.max(totalFare, MINIMUM_FARE);
     }
-
-    public InvoiceSummary calculatefare(Ride[] rides) {
-        double totalFare = 0;
-        for (Ride ride : rides)
-            totalFare += this.calculatefare(ride.distance, (int) ride.time);
-
-        return new InvoiceSummary(rides.length, totalFare);
+    public double calculateFareForMultipleRides(Ride[] rides) {
+        double aggregateFare = 0;
+        for (Ride ride : rides) {
+            listOfRides.add(ride);
+            aggregateFare += calculatefare(ride.distance, ride.time);
+        }
+        return aggregateFare;
     }
 
-    public void addRides(String userId, Ride[] rides) {
-        rideRepository.addRides(userId,rides);
+    public InvoiceSummary getInvoiceSummary(Ride[] rides) {
+        return new InvoiceSummary(rides.length, calculateFareForMultipleRides(rides));
     }
 
-    @Override
-    public InvoiceSummary getInvoiceSummary(String userId) {
-        double totalFare = this.calculateFare(rideRepository.getRides(userId));
-        return new InvoiceSummary(rideRepository.getRides(userId).length,totalFare);
+    public void addRides(String userId) {
+        rideRepository.addUserRides(userId, listOfRides);
+    }
+
+    public ArrayList<Ride> getRidesByUserId(String userId) {
+        ArrayList<Ride> ridesByUserId = rideRepository.getRidesByUserId(userId);
+        return ridesByUserId;
     }
 }
-
-
-
-
-

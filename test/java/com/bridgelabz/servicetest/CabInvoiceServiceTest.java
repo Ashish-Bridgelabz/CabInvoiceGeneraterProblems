@@ -1,13 +1,13 @@
 package com.bridgelabz.servicetest;
 
-import com.bridgelabz.service.InvoiceGenerator;
+import com.bridgelabz.service.InvoiceService;
 import com.bridgelabz.service.InvoiceSummary;
 import com.bridgelabz.service.Ride;
 import org.junit.Assert;
 import org.junit.Test;
 
 public class CabInvoiceServiceTest {
-    InvoiceGenerator invoiceGenerator = new InvoiceGenerator();
+    InvoiceService invoiceGenerator = new InvoiceService();
     private double distance;
     private int time;
 
@@ -35,10 +35,22 @@ public class CabInvoiceServiceTest {
                 new Ride(0.1, 1),
                 new Ride(4.1, 25)
         };
-        InvoiceSummary summary = invoiceGenerator.calculatefare(rides);
-      InvoiceSummary InvoiceSummary = new  InvoiceSummary(3,8.0);
-       double fare = invoiceGenerator.calculatefare(distance, time);
-      Assert.assertEquals (5,5);
+        double totalFare = invoiceGenerator.calculateFareForMultipleRides(rides);
+        Assert.assertEquals(96, totalFare, 0);
     }
 
+    @Test
+    public void givenUserIdAndRide_shouldReturnInvoiceSummary() {
+        String userId = "gdev3123@gmail.com";
+        Ride[] rides = {
+                new Ride(2.0, 5),
+                new Ride(0.1, 1),
+                new Ride(4.1, 25)
+        };
+        invoiceGenerator.addRides(userId);
+        InvoiceSummary invoiceSummary = invoiceGenerator.getInvoiceSummary(rides);
+        InvoiceSummary fare = new InvoiceSummary(3, 96);
+        Assert.assertEquals(fare, invoiceSummary);
+        Assert.assertEquals(rides.length, invoiceGenerator.getRidesByUserId(userId).size());
+    }
 }
